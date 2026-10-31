@@ -1,0 +1,8 @@
+# Built packages: attach these to a GitHub Release instead of committing them
+dist/
+*.zip
+*.xpi
+
+node_modules/
+.DS_Store
+Thumbs.db

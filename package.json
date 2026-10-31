@@ -1,0 +1,14 @@
+{
+  "name": "authscope",
+  "version": "3.2.0",
+  "private": true,
+  "description": "See which sites you signed in to with Google, Apple, GitHub and other providers.",
+  "license": "MPL-2.0",
+  "scripts": {
+    "build": "./build.sh",
+    "test": "./tests/run.sh"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

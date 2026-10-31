@@ -1,0 +1,310 @@
+<title>AuthScope</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="AuthScope remembers whether you signed in to each site with Google, Apple, GitHub or another account.">
+<link rel="icon" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap">
+<style>
+/* Layout: left-aligned hero with the "which button?" sign-in box as its centrepiece, then a screenshot strip,
+   a three-step how-to, privacy, and support. Brand colours come from the AuthScope logo. */
+:root {
+  --bg: #f4f5fa;
+  --surface: #ffffff;
+  --ink: #0f1730;          /* the navy of "Auth" in the logo */
+  --muted: #565f7a;
+  --line: #dfe3ee;
+  --blue: #1677ff;         /* logo gradient start */
+  --violet: #7b3cf0;       /* logo gradient end */
+  --accent: #3b5bf5;
+  --accent-ink: #ffffff;
+  --ok: #0f8a5f;
+  --mark: #e8eeff;
+  --display: "Bricolage Grotesque", "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1020; --surface: #151b30; --ink: #eef0f8; --muted: #a2aac2; --line: #263052;
+    --blue: #4c9bff; --violet: #a77bff; --accent: #6f8bff; --accent-ink: #0c1020; --ok: #4fd1a5; --mark: #1d2645;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1020; --surface: #151b30; --ink: #eef0f8; --muted: #a2aac2; --line: #263052;
+  --blue: #4c9bff; --violet: #a77bff; --accent: #6f8bff; --accent-ink: #0c1020; --ok: #4fd1a5; --mark: #1d2645;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 17px/1.6 var(--body); }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.wrap {
+  max-width: 1120px; margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.02em; }
+h2 { font-size: clamp(30px, 4vw, 42px); line-height: 1.1; font-weight: 800; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 60ch; }
+
+/* ---------- Nav ---------- */
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font: 800 24px/1 var(--display); letter-spacing: -0.02em; }
+.logo img { width: 34px; height: 34px; }
+.logo .scope { background: linear-gradient(90deg, var(--blue), var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nav-links { display: flex; gap: 22px; font-size: 15px; }
+.nav-links a { color: var(--muted); text-decoration: none; }
+.nav-links a:hover { color: var(--ink); }
+@media (max-width: 620px) { .nav-links { display: none; } }
+
+/* ---------- Hero ---------- */
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; padding-block: 40px 72px; }
+@media (max-width: 880px) { .hero { grid-template-columns: 1fr; gap: 40px; padding-block: 16px 56px; } }
+.hero h1 { font-size: clamp(42px, 6.2vw, 72px); line-height: 0.98; font-weight: 800; }
+.hero h1 .q { background: linear-gradient(95deg, var(--blue), var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .lede { font-size: 20px; margin-top: 22px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.store {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px;
+  border-radius: 12px; font: 700 17px/1 var(--body); text-decoration: none;
+  background: var(--ink); color: var(--bg); border: 2px solid var(--ink);
+}
+.store.alt { background: transparent; color: var(--ink); }
+.store:hover { transform: translateY(-1px); }
+.store[aria-disabled="true"] { cursor: default; transform: none; opacity: 0.92; }
+.store small { font-weight: 400; font-size: 13px; opacity: 0.8; }
+.fine { margin-top: 16px; font-size: 14.5px; color: var(--muted); }
+
+/* The sign-in box: the moment AuthScope exists for */
+.signin {
+  position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+  padding: 30px 28px 26px; box-shadow: 0 30px 60px -30px rgba(15, 23, 48, 0.35);
+  max-width: 460px; justify-self: center; width: 100%;
+}
+.signin .site { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: var(--muted); }
+.signin .site i { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, #ffb347, #ff6f61); display: block; }
+.signin h3 { font-size: 26px; margin-top: 14px; }
+.signin .opts { display: grid; gap: 10px; margin-top: 20px; }
+.opt {
+  position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 50px; padding: 10px 16px;
+  border: 1.5px solid var(--line); border-radius: 12px; font-weight: 700; font-size: 16px; color: var(--ink); background: var(--surface);
+}
+.opt .label { white-space: nowrap; }
+.opt .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
+.opt.used { border-color: var(--accent); background: var(--mark); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+.opt .stamp {
+  margin-left: auto; font: 700 12.5px/1 var(--body); color: var(--accent); white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.opt .stamp img { width: 16px; height: 16px; }
+.signin .or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; margin: 2px 0; }
+.signin .or::before, .signin .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.badge {
+  position: absolute; top: -18px; right: 22px; display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 7px 10px 7px 8px;
+  box-shadow: 0 10px 24px -12px rgba(15, 23, 48, 0.4); font-size: 13px; color: var(--muted);
+}
+.badge img { width: 22px; height: 22px; }
+.badge b { background: #4285f4; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 6px; }
+@media (prefers-reduced-motion: no-preference) {
+  .opt.used { animation: pick 900ms 500ms cubic-bezier(.2, .8, .2, 1) both; }
+  .opt.used .stamp { animation: stamp 500ms 1200ms ease-out both; }
+}
+@keyframes pick { from { border-color: var(--line); background: var(--surface); box-shadow: none; } }
+@keyframes stamp { from { opacity: 0; transform: translateX(8px); } }
+
+/* ---------- Screenshots ---------- */
+section { padding-block: 72px; }
+.band { background: var(--surface); border-block: 1px solid var(--line); }
+.head { display: flex; align-items: end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.head .lede { margin-top: 10px; }
+.arrows { display: flex; gap: 8px; }
+.arrows button {
+  width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--bg);
+  color: var(--ink); font-size: 20px; cursor: pointer;
+}
+.arrows button:hover { border-color: var(--ink); }
+.strip {
+  display: grid; grid-auto-flow: column; grid-auto-columns: min(840px, 86%); gap: 22px;
+  overflow-x: auto; scroll-snap-type: x mandatory; padding: 30px 2px 18px; scrollbar-width: thin;
+}
+.strip figure { margin: 0; scroll-snap-align: start; min-width: 0; }
+.strip img { display: block; width: 100%; aspect-ratio: 1280 / 800; height: auto; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); }
+.strip figcaption { margin-top: 12px; color: var(--muted); font-size: 15.5px; max-width: 60ch; }
+.strip figcaption b { color: var(--ink); }
+
+/* ---------- How it works (a real sequence) ---------- */
+.steps { list-style: none; padding: 0; margin: 36px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; counter-reset: s; }
+@media (max-width: 820px) { .steps { grid-template-columns: 1fr; } }
+.steps li { counter-increment: s; border-top: 2px solid var(--ink); padding-top: 18px; min-width: 0; }
+.steps li::before { content: counter(s); font: 800 44px/1 var(--display); color: var(--accent); display: block; margin-bottom: 12px; }
+.steps h3 { font-size: 22px; }
+.steps p { color: var(--muted); margin-top: 8px; }
+
+.providers { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px; }
+.providers span { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 13px; font-size: 14.5px; }
+
+/* ---------- Privacy ---------- */
+.privacy { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; }
+@media (max-width: 820px) { .privacy { grid-template-columns: 1fr; gap: 24px; } }
+.privacy dl { margin: 0; display: grid; gap: 18px; }
+.privacy dt { font-weight: 700; }
+.privacy dd { margin: 4px 0 0; color: var(--muted); }
+.updated { font-size: 14px; color: var(--muted); margin-top: 14px; }
+
+/* ---------- Support + footer ---------- */
+.support { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.support .store { background: transparent; color: var(--ink); }
+.support .store svg { color: #e0457b; }
+footer { padding-block: 34px 48px; color: var(--muted); font-size: 14.5px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--line); }
+footer a { color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <nav class="nav" aria-label="Main">
+    <a class="logo" href="#top" id="top"><img src="img/shield.png" alt=""><span>Auth<span class="scope">Scope</span></span></a>
+    <div class="nav-links">
+      <a href="#screens">Screenshots</a>
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Which button did you <span class="q">sign in with?</span></h1>
+      <p class="lede">AuthScope remembers whether you used Google, Apple, GitHub or another account on each site, and shows you the next time you're there.</p>
+      <div class="cta">
+        <a class="store" id="chrome" data-store="chrome">Add to Chrome <small>Coming soon</small></a>
+        <a class="store alt" id="firefox" data-store="firefox">Add to Firefox <small>Coming soon</small></a>
+      </div>
+      <p class="fine">Free. Works in Chrome, Edge, Brave, Arc and Firefox. Your list stays in your browser.</p>
+    </div>
+
+    <div class="signin" role="img" aria-label="A sign-in page offering Google, Apple, GitHub and email. AuthScope marks Google as the one you used, 13 days ago.">
+      <div class="badge" aria-hidden="true"><img src="img/shield.png" alt=""><b>G</b></div>
+      <div class="site" aria-hidden="true"><i></i>brightdesk.app</div>
+      <h3 aria-hidden="true">Sign in to Brightdesk</h3>
+      <div class="opts" aria-hidden="true">
+        <div class="opt used" style="--c:#4285f4"><span class="dot"></span><span class="label">Continue with Google</span><span class="stamp"><img src="img/shield.png" alt="">Used 13 days ago</span></div>
+        <div class="opt" style="--c:#555"><span class="dot"></span>Continue with Apple</div>
+        <div class="opt" style="--c:#6e5494"><span class="dot"></span>Continue with GitHub</div>
+        <div class="or">or</div>
+        <div class="opt" style="--c:transparent"><span class="dot" style="border:1.5px solid var(--muted)"></span>Continue with email</div>
+      </div>
+    </div>
+  </header>
+</div>
+
+<section class="band" id="screens" aria-labelledby="screens-h">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <h2 id="screens-h">See it in action</h2>
+        <p class="lede">Five things AuthScope does, from the toolbar to the dashboard.</p>
+      </div>
+      <div class="arrows">
+        <button type="button" id="prev" aria-label="Previous screenshot">&larr;</button>
+        <button type="button" id="next" aria-label="Next screenshot">&rarr;</button>
+      </div>
+    </div>
+    <div class="strip" id="strip" tabindex="0" aria-label="Screenshots">
+      <figure><img src="img/authscope-1-toolbar-badge.png" alt="AuthScope's popup on notion.so showing it was signed in with Google and Apple" width="1280" height="800">
+        <figcaption><b>On any site.</b> The toolbar icon shows the provider you used, and the popup gives the details.</figcaption></figure>
+      <figure><img src="img/authscope-2-chart.png" alt="A 3D pie chart of sites per provider with Google selected and its sites listed" width="1280" height="800" loading="lazy">
+        <figcaption><b>At a glance.</b> A 3D chart of how many sites use each provider. Click a slice to list them.</figcaption></figure>
+      <figure><img src="img/authscope-3-check-accounts.png" alt="The Check your accounts panel with app counts for Google, GitHub, Microsoft and others" width="1280" height="800" loading="lazy">
+        <figcaption><b>From years ago.</b> Check the apps linked to your Google, GitHub, Microsoft and other accounts in one click.</figcaption></figure>
+      <figure><img src="img/authscope-4-site-list.png" alt="The site list filtered to GitHub, each app with its website" width="1280" height="800" loading="lazy">
+        <figcaption><b>One list.</b> Every app with its website and provider. Filter, search, or remove anything.</figcaption></figure>
+      <figure><img src="img/authscope-5-private.png" alt="AuthScope's dashboard in dark mode beside its privacy points" width="1280" height="800" loading="lazy">
+        <figcaption><b>Private.</b> No account, no tracking, nothing sent anywhere.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <h2 id="how-h">How it works</h2>
+    <ol class="steps">
+      <li><h3>Install it</h3><p>Add AuthScope to Chrome or Firefox. It opens its dashboard so you can get started.</p></li>
+      <li><h3>Check your accounts</h3><p>Click <b>Check all</b>. AuthScope reads the apps linked to each account you're signed in to and adds them to your list, with their websites.</p></li>
+      <li><h3>Browse as usual</h3><p>The toolbar icon shows which provider you used on each site. New sign-ins and sign-ups are added on their own.</p></li>
+    </ol>
+    <div class="providers" aria-label="Supported providers">
+      <span>Google</span><span>Apple</span><span>GitHub</span><span>Microsoft</span><span>Facebook</span><span>X</span><span>LinkedIn</span><span>Discord</span><span>GitLab</span><span>Slack</span><span>Amazon</span><span>Twitch</span><span>Yahoo</span>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="privacy" aria-labelledby="privacy-h">
+  <div class="wrap privacy">
+    <div>
+      <h2 id="privacy-h">Privacy</h2>
+      <p class="lede" style="margin-top:14px">AuthScope keeps a list of which sites you used which sign-in provider for. That list never leaves your browser.</p>
+      <p class="updated">Last updated 30 October 2026.</p>
+    </div>
+    <dl>
+      <div><dt>What it stores</dt><dd>Site names and addresses, the provider you used for each (for example Google or GitHub), and when. They're kept in your browser's own extension storage.</dd></div>
+      <div><dt>What it doesn't store</dt><dd>Passwords, passkeys, email addresses, or your browsing history. It doesn't run any script on the sites you visit.</dd></div>
+      <div><dt>What it sends</dt><dd>Nothing. There are no servers, accounts, ads or analytics. To show provider icons, it loads each provider's small site icon from that provider's website. When you click Check, it opens your providers' own connected-apps pages, signed in as you, and reads the app names there.</dd></div>
+      <div><dt>Your control</dt><dd>Remove any site from the dashboard, export your list as a backup or spreadsheet, or delete everything at once. Uninstalling AuthScope deletes its data.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section aria-labelledby="support-h">
+  <div class="wrap support">
+    <div>
+      <h2 id="support-h">Free, and staying that way</h2>
+      <p class="lede" style="margin-top:10px">If AuthScope saves you a "forgot which button" moment, you can support it on Ko-fi.</p>
+    </div>
+    <a class="store" href="https://ko-fi.com/varennck" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M8 14.2 6.9 13.2C3 9.7.5 7.4.5 4.6.5 2.4 2.2.7 4.4.7c1.2 0 2.5.6 3.6 1.7C9.1 1.3 10.4.7 11.6.7c2.2 0 3.9 1.7 3.9 3.9 0 2.8-2.5 5.1-6.4 8.6z" fill="currentColor"/></svg>
+      Support AuthScope
+    </a>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <span>AuthScope</span>
+    <span><a href="#privacy">Privacy</a> &nbsp; <a href="https://ko-fi.com/varennck" target="_blank" rel="noopener">Ko-fi</a></span>
+  </footer>
+</div>
+
+<script>
+  // Store links: paste each listing's address here once it's live; the buttons switch on automatically.
+  const STORE_LINKS = {
+    chrome: '',
+    firefox: 'https://addons.mozilla.org/en-GB/firefox/addon/authscope/',
+  };
+  for (const a of document.querySelectorAll('[data-store]')) {
+    const url = STORE_LINKS[a.dataset.store];
+    if (url) {
+      a.href = url; a.target = '_blank'; a.rel = 'noopener';
+      a.querySelector('small')?.remove();
+    } else {
+      a.setAttribute('aria-disabled', 'true');
+      a.setAttribute('role', 'link');
+      a.title = 'AuthScope is on its way to this store';
+    }
+  }
+
+  // Screenshot strip: arrow buttons step one screenshot at a time.
+  const strip = document.getElementById('strip');
+  const step = dir => {
+    const fig = strip.querySelector('figure');
+    const gap = parseFloat(getComputedStyle(strip).columnGap) || 0;
+    strip.scrollBy({ left: dir * (fig.getBoundingClientRect().width + gap), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  };
+  document.getElementById('prev').addEventListener('click', () => step(-1));
+  document.getElementById('next').addEventListener('click', () => step(1));
+  strip.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+  });
+</script>

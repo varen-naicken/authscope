@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AuthScope</title>
+<link rel="stylesheet" href="ui/ui.css">
+<style>
+  body { width: 340px; }
+  header { padding: 16px 18px 6px; }
+  .site { font-size: 22px; font-weight: 700; line-height: 1.2; word-break: break-all; margin: 0; }
+  .lead { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; }
+  .methods { padding: 12px 18px 4px; display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .row .when { font-size: 13px; color: var(--muted); text-align: right; }
+  .row + .who { font-size: 13px; color: var(--muted); padding: 3px 0 0 4px; word-break: break-all; }
+  .empty { margin: 0; color: var(--muted); }
+  .add { display: flex; gap: 8px; padding: 14px 18px; }
+  .add select { flex: 1; }
+  footer { border-top: 1px solid var(--line); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  footer .donate { font-size: 13px; padding: 5px 8px; }
+  .access { margin: 0 18px 12px; width: calc(100% - 36px); justify-content: center; }
+  .start { margin: 0 18px 14px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+  .start p { margin: 0 0 10px; font-size: 13.5px; }
+  .start .btn { width: 100%; justify-content: center; }
+  .hint { font-size: 12.5px; color: var(--muted); padding: 0 18px 12px; margin: 0; }
+</style>
+</head>
+<body>
+  <header>
+    <h1 class="site" id="site">…</h1>
+    <p class="lead" id="lead"></p>
+  </header>
+  <div class="start" id="start" hidden>
+    <p>Your list is empty. Check your Google, GitHub and other accounts to fill it in.</p>
+    <button class="btn primary" id="startBtn" type="button">Get started</button>
+  </div>
+  <div id="methods" class="methods"></div>
+  <form class="add" id="addForm">
+    <label class="sr" for="addMethod">Add a way you sign in here</label>
+    <select id="addMethod"></select>
+    <button class="btn" type="submit">Add</button>
+  </form>
+  <p class="hint" id="hint" hidden>A dashed tag means the sign-in was started but the extension didn't see it finish.</p>
+  <button class="btn primary access" id="access" type="button" hidden>Allow access so new sign-ins are recorded</button>
+  <footer>
+    <button class="btn quiet" id="openAll" type="button">All sites</button>
+    <span class="muted" style="font-size:12.5px" id="count"></span>
+    <a class="btn quiet donate" id="donate" target="_blank" rel="noopener noreferrer" hidden><svg class="heart" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M8 14.2 6.9 13.2C3 9.7.5 7.4.5 4.6.5 2.4 2.2.7 4.4.7c1.2 0 2.5.6 3.6 1.7C9.1 1.3 10.4.7 11.6.7c2.2 0 3.9 1.7 3.9 3.9 0 2.8-2.5 5.1-6.4 8.6z" fill="currentColor"/></svg>Donate</a>
+  </footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

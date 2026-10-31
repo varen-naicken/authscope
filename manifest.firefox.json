@@ -1,0 +1,82 @@
+{
+  "manifest_version": 3,
+  "name": "AuthScope",
+  "version": "3.2.0",
+  "description": "See which sites you signed in to with Google, Apple, GitHub and other providers. Everything stays on your device.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "login-ledger@varen.local",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "permissions": [
+    "storage",
+    "webNavigation",
+    "webRequest",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://accounts.google.com/*",
+    "https://myaccount.google.com/*",
+    "https://appleid.apple.com/*",
+    "https://github.com/*",
+    "https://login.microsoftonline.com/*",
+    "https://login.live.com/*",
+    "https://account.live.com/*",
+    "https://*.facebook.com/*",
+    "https://*.x.com/*",
+    "https://*.twitter.com/*",
+    "https://*.linkedin.com/*",
+    "https://*.discord.com/*",
+    "https://*.discordapp.com/*",
+    "https://*.slack.com/*",
+    "https://*.twitch.tv/*",
+    "https://gitlab.com/*",
+    "https://api.login.yahoo.com/*",
+    "https://login.yahoo.com/*",
+    "https://www.amazon.com/*",
+    "https://www.amazon.co.uk/*",
+    "https://www.amazon.ie/*",
+    "https://www.amazon.de/*",
+    "https://www.amazon.fr/*",
+    "https://www.amazon.it/*",
+    "https://www.amazon.es/*",
+    "https://www.amazon.ca/*",
+    "https://www.amazon.com.au/*",
+    "https://www.amazon.co.jp/*",
+    "https://www.amazon.in/*"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AuthScope",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "dashboard.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "short_name": "AuthScope"
+}

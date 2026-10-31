@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AuthScope</title>
+<link rel="icon" href="icons/icon32.png">
+<link rel="stylesheet" href="ui/ui.css">
+<link rel="stylesheet" href="ui/dashboard.css">
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div>
+      <h1 class="brand"><img src="icons/icon128.png" alt="" width="40" height="40"><span>Auth<span class="brand-scope">Scope</span></span></h1>
+      <p class="muted" id="summary">How you sign in to each site, kept only in this browser.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn primary" id="scan" type="button" hidden>Scan browsing history</button>
+      <a class="btn donate" id="donate" target="_blank" rel="noopener noreferrer" hidden><svg class="heart" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M8 14.2 6.9 13.2C3 9.7.5 7.4.5 4.6.5 2.4 2.2.7 4.4.7c1.2 0 2.5.6 3.6 1.7C9.1 1.3 10.4.7 11.6.7c2.2 0 3.9 1.7 3.9 3.9 0 2.8-2.5 5.1-6.4 8.6z" fill="currentColor"/></svg>Support AuthScope</a>
+    </div>
+  </header>
+
+  <section class="welcome" id="access" hidden>
+    <h2>Allow AuthScope to see sign-in pages</h2>
+    <p>Firefox asks before letting an extension use the Google, GitHub and other provider sites it needs. Without this, new sign-ins can't be recorded and Check your accounts can't run.</p>
+    <button class="btn primary" id="grant" type="button">Allow on provider sites</button>
+  </section>
+
+  <section class="welcome" id="welcome" hidden>
+    <h2>Fill this in from your browsing history</h2>
+    <p><span id="historyLength">Chrome keeps about 90 days of history.</span> Scanning it finds the Google, Apple, GitHub and other sign-in pages you went through and which site each was for. Nothing leaves this browser.</p>
+    <button class="btn primary" id="scan2" type="button">Scan browsing history</button>
+    <p class="muted small">Older sign-ins won't be in history. Use <strong>Check your accounts</strong> to fill those in.</p>
+  </section>
+
+  <p class="status" id="status" role="status" aria-live="polite"></p>
+
+  <div class="layout">
+    <main>
+      <section class="onboard" id="onboard" hidden aria-labelledby="onboardTitle">
+        <div class="onboard-head">
+          <img src="icons/icon128.png" width="44" height="44" alt="">
+          <div>
+            <h2 id="onboardTitle">Welcome to AuthScope</h2>
+            <p>Let's find the sites you've signed in to with Google, GitHub and your other accounts. It takes about a minute.</p>
+          </div>
+        </div>
+        <ol class="onboard-steps">
+          <li id="stepAccess" hidden>
+            <div><h3>Allow AuthScope on the provider sites</h3>
+              <p>Firefox asks before an extension can use other sites. AuthScope only uses the pages of Google, GitHub and the other providers.</p></div>
+            <button class="btn primary" id="onboardGrant" type="button">Allow</button>
+          </li>
+          <li>
+            <div><h3>Stay signed in to your accounts</h3>
+              <p>AuthScope reads the list of linked apps from each account you're signed in to in this browser. Nothing is sent anywhere.</p></div>
+          </li>
+          <li id="stepCheck">
+            <div><h3>Check all your accounts</h3>
+              <p id="checkNote">Each account's linked-apps page opens in a background tab, gets read, and closes again.</p>
+              <div class="onboard-progress" id="onboardProgress" hidden>
+                <div class="bar"><span id="onboardBar"></span></div>
+                <p id="onboardProgressText" role="status" aria-live="polite"></p>
+              </div></div>
+            <button class="btn primary" id="onboardCheck" type="button">Check all now</button>
+          </li>
+          <li>
+            <div><h3>Pin AuthScope to your toolbar</h3>
+              <p>Open the Extensions menu (the puzzle-piece icon) and pin AuthScope. Its icon then shows which account you used on the site you're on.</p></div>
+          </li>
+        </ol>
+        <div class="onboard-foot">
+          <button class="btn quiet" id="onboardSkip" type="button">Skip for now</button>
+        </div>
+      </section>
+
+      <section class="chart-panel" id="chartPanel" hidden>
+        <div class="chart-head">
+          <h2>Sign-ins by provider</h2>
+          <p class="muted small">Click a slice to list its sites. Drag sideways to turn the pie.</p>
+        </div>
+        <div class="chart-body">
+          <div class="chart-canvas">
+            <canvas id="pie" role="img"></canvas>
+            <div class="pie-tip" id="pieTip" hidden></div>
+          </div>
+          <ul class="legend" id="legend" aria-label="Sites per provider"></ul>
+        </div>
+      </section>
+
+      <div class="showing" id="showing" hidden>
+        <span id="showingText"></span>
+        <button class="btn quiet" id="showAll" type="button">Show all sites</button>
+      </div>
+
+      <div class="filters">
+        <label class="sr" for="q">Search sites</label>
+        <input type="search" id="q" placeholder="Search sites, websites or usernames">
+        <label class="sr" for="filter">Show</label>
+        <select id="filter"><option value="">All methods</option></select>
+        <label class="sr" for="sort">Sort</label>
+        <select id="sort">
+          <option value="recent">Recently used</option>
+          <option value="az">A to Z</option>
+        </select>
+      </div>
+
+      <ol class="list" id="list"></ol>
+      <nav class="pager" id="pager" aria-label="Pages of sites" hidden>
+        <button class="btn" id="prevPage" type="button">Previous</button>
+        <span id="pageInfo" aria-live="polite"></span>
+        <button class="btn" id="nextPage" type="button">Next</button>
+      </nav>
+      <p class="empty" id="empty" hidden></p>
+
+      <details class="adder" id="adder">
+        <summary>Add a site by hand</summary>
+        <form id="addForm">
+          <label>Site <input type="text" id="addSite" placeholder="example.com" required autocomplete="off"></label>
+          <label>Signed in with <select id="addMethod"></select></label>
+          <button class="btn" type="submit">Add</button>
+        </form>
+      </details>
+    </main>
+
+    <aside>
+      <section class="panel sync">
+        <h2>Check your accounts</h2>
+        <p class="muted small">Opens each account's connected-apps page in a background tab and reads which sites you've signed in to with it, including ones from years ago. You need to be signed in to each account in this browser.</p>
+        <div class="sync-actions">
+          <label class="select-all"><input type="checkbox" id="selectAll"> Select all</label>
+          <div class="sync-buttons">
+            <button class="btn" id="syncSelected" type="button" disabled>Check selected</button>
+            <button class="btn primary" id="syncAll" type="button">Check all</button>
+          </div>
+        </div>
+        <ul class="sync-rows" id="syncRows"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Your data</h2>
+        <div class="data-actions">
+          <button class="btn" id="exportJson" type="button">Export backup</button>
+          <button class="btn" id="exportCsv" type="button">Export as spreadsheet</button>
+          <button class="btn" id="importBtn" type="button">Import backup</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden>
+        </div>
+        <button class="btn quiet danger" id="clear" type="button">Delete everything</button>
+      </section>
+
+      <section class="panel">
+        <h2>Settings</h2>
+        <label class="check"><input type="checkbox" data-setting="showBadge"> Show the provider on the toolbar icon</label>
+        <p class="muted small">AuthScope only records sites you signed in to or signed up for with a provider like Google, Apple or GitHub. Passwords, passkeys and email codes are left to your password manager.</p>
+      </section>
+    </aside>
+  </div>
+</div>
+<script type="module" src="dashboard.js"></script>
+</body>
+</html>
