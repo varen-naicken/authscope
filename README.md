@@ -10,7 +10,7 @@ It deliberately doesn't record email/password, passkey or email-code sign-ins: y
 
 Works in Chrome, Edge, Brave, Arc and other Chromium browsers, and in Firefox 140 or later.
 
-**Get it:** [Firefox Add-ons](https://addons.mozilla.org/en-GB/firefox/addon/authscope/) · Chrome Web Store (coming soon)
+**Get it:** [Firefox Add-ons](https://addons.mozilla.org/en-GB/firefox/addon/authscope/) · [Chrome Web Store](https://chromewebstore.google.com/detail/authscope/hhfbggbhabpmfmefghkaakkgchedlgje)
 
 The packages for each version are also attached to this repository's [Releases](../../releases).
 

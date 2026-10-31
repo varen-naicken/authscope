@@ -72,10 +72,10 @@ p { margin: 0; }
   border-radius: 12px; font: 700 17px/1 var(--body); text-decoration: none;
   background: var(--ink); color: var(--bg); border: 2px solid var(--ink);
 }
-.store.alt { background: transparent; color: var(--ink); }
 .store:hover { transform: translateY(-1px); }
 .store[aria-disabled="true"] { cursor: default; transform: none; opacity: 0.92; }
 .store small { font-weight: 400; font-size: 13px; opacity: 0.8; }
+.store .browser { width: 24px; height: 24px; flex: none; }
 .fine { margin-top: 16px; font-size: 14.5px; color: var(--muted); }
 
 /* The sign-in box: the moment AuthScope exists for */
@@ -178,8 +178,14 @@ footer a { color: var(--muted); }
       <h1>Which button did you <span class="q">sign in with?</span></h1>
       <p class="lede">AuthScope remembers whether you used Google, Apple, GitHub or another account on each site, and shows you the next time you're there.</p>
       <div class="cta">
-        <a class="store" id="chrome" data-store="chrome">Add to Chrome <small>Coming soon</small></a>
-        <a class="store alt" id="firefox" data-store="firefox">Add to Firefox <small>Coming soon</small></a>
+        <a class="store" id="chrome" data-store="chrome">
+          <img class="browser" src="img/chrome.svg" alt="">
+          Add to Chrome <small>Coming soon</small>
+        </a>
+        <a class="store" id="firefox" data-store="firefox">
+          <img class="browser" src="img/firefox.svg" alt="">
+          Add to Firefox <small>Coming soon</small>
+        </a>
       </div>
       <p class="fine">Free. Works in Chrome, Edge, Brave, Arc and Firefox. Your list stays in your browser.</p>
     </div>
@@ -279,7 +285,7 @@ footer a { color: var(--muted); }
 <script>
   // Store links: paste each listing's address here once it's live; the buttons switch on automatically.
   const STORE_LINKS = {
-    chrome: '',
+    chrome: 'https://chromewebstore.google.com/detail/authscope/hhfbggbhabpmfmefghkaakkgchedlgje',
     firefox: 'https://addons.mozilla.org/en-GB/firefox/addon/authscope/',
   };
   for (const a of document.querySelectorAll('[data-store]')) {
