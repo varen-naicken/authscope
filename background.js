@@ -1,5 +1,5 @@
-import { detectProvider, chooseSite, siteOf, isAttributableSite, isProviderDomain, looksLikeCancel, METHODS } from './lib/providers.js';
-import { recordMethod, confirmMethod, removeMethod, getSite, getAll, getSettings, purgeNonProvider } from './lib/store.js';
+import { detectProvider, chooseSite, siteOf, isAttributableSite, isProviderDomain, isMiddleman, looksLikeCancel, METHODS } from './lib/providers.js';
+import { recordMethod, confirmMethod, removeMethod, getSite, getAll, getSettings, saveSettings, purgeNonProvider, MARK_ORIGINS } from './lib/store.js';
 import { findEntriesFor, combinedMethods } from './lib/match.js';
 
 // ---- Per-tab session state (survives the service worker going to sleep) ----
@@ -137,6 +137,33 @@ async function updateBadge(tabId, knownUrl) {
 }
 
 chrome.tabs.onActivated.addListener(({ tabId }) => updateBadge(tabId));
+
+// ---- 5. Point at the button you used, on the page itself (opt-in) ----
+// Needs access to every site, which AuthScope only has if you switched this on in Settings.
+// Runs only on sites already in your list.
+async function pointAtButtons(tabId, url) {
+  try {
+    const settings = await getSettings();
+    if (!settings.markButtons || !url.startsWith('https://')) return;
+    let site = siteOf(url);
+    // Hosted login pages (auth0, Clerk...) belong to the site that sent you there.
+    if (isMiddleman(site)) site = (await getState()).lastSite[tabId] || null;
+    if (!site || isProviderDomain(site)) return;
+    const methods = Object.entries(combinedMethods(findEntriesFor(await getAll(), site)))
+      .sort((a, b) => b[1].lastSeen - a[1].lastSeen).map(([id]) => id);
+    if (!methods.length || !(await chrome.permissions.contains(MARK_ORIGINS))) return;
+    const target = { tabId, frameIds: [0] };
+    await chrome.scripting.executeScript({ target, files: ['mark.js'] });
+    await chrome.scripting.executeScript({ target, func: ids => window.__authscope?.set(ids), args: [methods] });
+  } catch { /* tab closed, or a page the browser doesn't let extensions touch */ }
+}
+
+chrome.webNavigation.onDOMContentLoaded.addListener(({ tabId, frameId, url }) => { if (frameId === 0) pointAtButtons(tabId, url); });
+chrome.webNavigation.onHistoryStateUpdated.addListener(({ tabId, frameId, url }) => { if (frameId === 0) pointAtButtons(tabId, url); });
+// Access taken away in the browser's own settings: switch the option off to match.
+chrome.permissions.onRemoved.addListener(async ({ origins = [] }) => {
+  if (origins.some(o => MARK_ORIGINS.origins.includes(o)) && (await getSettings()).markButtons) await saveSettings({ markButtons: false });
+});
 chrome.storage.onChanged.addListener(async (changes, area) => {
   if (area !== 'local' || !(changes.accounts || changes.settings)) return;
   const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });

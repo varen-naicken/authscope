@@ -75,10 +75,11 @@ If AuthScope is useful to you, you can support it on Ko-fi: https://ko-fi.com/va
 
 | Permission | Used for |
 |---|---|
-| Provider sites only (Google, Apple, GitHub, Microsoft, Facebook, X, LinkedIn, Discord, Slack, Twitch, GitLab, Yahoo, Amazon) | Notice when a site sends you to one of these providers to sign in, and read your connected-apps pages when you click Check. AuthScope has no access to any other site and runs no script on the sites you visit |
+| Provider sites only (Google, Apple, GitHub, Microsoft, Facebook, X, LinkedIn, Discord, Slack, Twitch, GitLab, Yahoo, Amazon) | Notice when a site sends you to one of these providers to sign in, and read your connected-apps pages when you click Check. Unless you switch on the option below, AuthScope has no access to any other site and runs no script on the sites you visit |
 | Tabs, web navigation, web requests | Notice provider sign-in pages and which site opened them, and update the badge |
 | Storage | Keep your ledger on this device |
 | Scripting | Read the app list on each provider's connected-apps page when you click Check |
+| All sites (optional, off by default) | Only asked for if you switch on **Point at the button you used on sign-in pages** in Settings. On sites already in your list, AuthScope then outlines the sign-in button you used ("Continue with Google" and so on) with a "You used this" label. It only reads the page's buttons and sends nothing anywhere. Switching the option off gives the access back |
 
 ## Browsing history scan (switched off)
 

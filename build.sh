@@ -10,7 +10,7 @@ for m in manifest.json manifest.firefox.json; do
   n=$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1]))['description']))" "$m")
   if [ "$n" -gt 132 ]; then echo "$m: description is $n characters; the Chrome Web Store allows 132." >&2; exit 1; fi
 done
-FILES=(background.js popup.html popup.js dashboard.html dashboard.js README.md lib ui icons fonts brand)
+FILES=(background.js mark.js popup.html popup.js dashboard.html dashboard.js README.md lib ui icons fonts brand)
 rm -rf dist && mkdir -p dist/stage/authscope dist/stage/firefox
 
 cp -r "${FILES[@]}" manifest.json dist/stage/authscope/

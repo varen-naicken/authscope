@@ -16,12 +16,12 @@ fi
 
 # Load a clean copy of the extension (without tests/, site/ or node_modules/).
 EXT="$OUT/ext"; rm -rf "$EXT"; mkdir -p "$EXT"
-cp -r background.js popup.html popup.js dashboard.html dashboard.js manifest.json lib ui icons fonts brand "$EXT/"
+cp -r background.js mark.js popup.html popup.js dashboard.html dashboard.js manifest.json lib ui icons fonts brand "$EXT/"
 export AUTHSCOPE_EXT="$EXT"
 
 node tests/match.test.mjs
 node tests/providers.test.mjs
-for t in e2e sync-e2e select-e2e pie-e2e donate-e2e onboard-e2e; do
+for t in e2e sync-e2e select-e2e pie-e2e donate-e2e onboard-e2e mark-e2e; do
   echo "== $t"; node "tests/$t.cjs"
 done
 echo "All tests passed."
