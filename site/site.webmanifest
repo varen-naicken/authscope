@@ -1,0 +1,13 @@
+{
+  "name": "AuthScope",
+  "short_name": "AuthScope",
+  "description": "See which account you signed in with on each site: Google, Apple, GitHub and more.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#f4f5fa",
+  "theme_color": "#3b5bf5",
+  "icons": [
+    { "src": "/img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/img/favicon-96.png", "sizes": "96x96", "type": "image/png" }
+  ]
+}

@@ -3,29 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AuthScope: Which account did I sign in with? | Free Chrome &amp; Firefox extension</title>
-<meta name="description" content="Free browser extension for Chrome and Firefox that remembers whether you signed in to each site with Google, Apple, GitHub or another account. Private: everything stays on your device.">
+<title>AuthScope: Which account did I sign in with?</title>
+<meta name="description" content="Free Chrome and Firefox extension that shows which account you signed in with on each site: Google, Apple, GitHub and more. Private, stays on your device.">
 <link rel="canonical" href="https://authscope.app/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AuthScope">
 <meta property="og:url" content="https://authscope.app/">
 <meta property="og:title" content="AuthScope: Which account did I sign in with?">
-<meta property="og:description" content="Free browser extension for Chrome and Firefox that remembers whether you signed in to each site with Google, Apple, GitHub or another account. Private: everything stays on your device.">
+<meta property="og:description" content="Free Chrome and Firefox extension that shows which account you signed in with on each site: Google, Apple, GitHub and more. Private, stays on your device.">
 <meta property="og:image" content="https://authscope.app/img/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="AuthScope's dashboard: a 3D pie chart of sites per sign-in provider and a list of sites signed in with Google">
+<meta property="og:locale" content="en_IE">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AuthScope: Which account did I sign in with?">
+<meta name="twitter:description" content="Free Chrome and Firefox extension that shows which account you signed in with on each site: Google, Apple, GitHub and more. Private, stays on your device.">
+<meta name="twitter:image" content="https://authscope.app/img/og.png">
+<meta name="twitter:image:alt" content="AuthScope's dashboard: a 3D pie chart of sites per sign-in provider and a list of sites signed in with Google">
+<meta name="theme-color" content="#3b5bf5">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AuthScope","url":"https://authscope.app/",
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebSite","@id":"https://authscope.app/#website","name":"AuthScope","url":"https://authscope.app/","inLanguage":"en"},
+{"@type":"SoftwareApplication","@id":"https://authscope.app/#app","name":"AuthScope","url":"https://authscope.app/",
+"image":"https://authscope.app/img/og.png","screenshot":"https://authscope.app/img/authscope-2-chart-1280.webp",
 "applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Firefox, Edge, Brave",
-"description":"Free browser extension for Chrome and Firefox that remembers whether you signed in to each site with Google, Apple, GitHub or another account. Private: everything stays on your device.","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},
+"description":"Free Chrome and Firefox extension that shows which account you signed in with on each site: Google, Apple, GitHub and more. Private, stays on your device.","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},
+"downloadUrl":["https://chromewebstore.google.com/detail/authscope/hhfbggbhabpmfmefghkaakkgchedlgje","https://addons.mozilla.org/en-GB/firefox/addon/authscope/"],
+"license":"https://www.mozilla.org/en-US/MPL/2.0/",
 "sameAs":["https://chromewebstore.google.com/detail/authscope/hhfbggbhabpmfmefghkaakkgchedlgje","https://addons.mozilla.org/en-GB/firefox/addon/authscope/","https://github.com/varen-naicken/authscope"]}
+]}
 </script>
-<link rel="icon" href="img/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/img/favicon-96.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/atkinson-hyperlegible-next-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Fonts are hosted here rather than loaded from Google Fonts: faster, and visitors' IPs aren't sent to Google. */
+@font-face { font-family: "Bricolage Grotesque"; font-style: normal; font-weight: 200 800; font-display: swap;
+  src: url(/fonts/bricolage-grotesque-latin.woff2) format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible Next"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/fonts/atkinson-hyperlegible-next-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible Next"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url(/fonts/atkinson-hyperlegible-next-latin-700-normal.woff2) format("woff2"); }
 /* Layout: left-aligned hero with the "which button?" sign-in box as its centrepiece, then a screenshot strip,
    a three-step how-to, privacy, and support. Brand colours come from the AuthScope logo. */
 :root {
@@ -106,7 +128,7 @@ p { margin: 0; }
 }
 .signin .site { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: var(--muted); }
 .signin .site i { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, #ffb347, #ff6f61); display: block; }
-.signin h3 { font-size: 26px; margin-top: 14px; }
+.signin .signin-title { font: 800 26px/1.2 var(--display); letter-spacing: -0.02em; margin: 14px 0 0; text-wrap: balance; }
 .signin .opts { display: grid; gap: 10px; margin-top: 20px; }
 .opt {
   position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 50px; padding: 10px 16px;
@@ -187,7 +209,7 @@ footer a { color: var(--muted); }
 
 <div class="wrap">
   <nav class="nav" aria-label="Main">
-    <a class="logo" href="#top" id="top"><img src="img/shield.png" alt=""><span>Auth<span class="scope">Scope</span></span></a>
+    <a class="logo" href="#top" id="top"><img src="img/shield-68.webp" alt="" width="34" height="34"><span>Auth<span class="scope">Scope</span></span></a>
     <div class="nav-links">
       <a href="#screens">Screenshots</a>
       <a href="#how">How it works</a>
@@ -200,12 +222,12 @@ footer a { color: var(--muted); }
       <h1>Which button did you <span class="q">sign in with?</span></h1>
       <p class="lede">AuthScope remembers whether you used Google, Apple, GitHub or another account on each site, and shows you the next time you're there.</p>
       <div class="cta">
-        <a class="store" id="chrome" data-store="chrome">
-          <img class="browser" src="img/chrome.svg" alt="">
+        <a class="store" id="chrome" data-store="chrome" href="https://chromewebstore.google.com/detail/authscope/hhfbggbhabpmfmefghkaakkgchedlgje" target="_blank" rel="noopener">
+          <img class="browser" src="img/chrome.svg" alt="" width="24" height="24">
           Add to Chrome <small>Coming soon</small>
         </a>
-        <a class="store" id="firefox" data-store="firefox">
-          <img class="browser" src="img/firefox.svg" alt="">
+        <a class="store" id="firefox" data-store="firefox" href="https://addons.mozilla.org/en-GB/firefox/addon/authscope/" target="_blank" rel="noopener">
+          <img class="browser" src="img/firefox.svg" alt="" width="24" height="24">
           Add to Firefox <small>Coming soon</small>
         </a>
       </div>
@@ -213,11 +235,11 @@ footer a { color: var(--muted); }
     </div>
 
     <div class="signin" role="img" aria-label="A sign-in page offering Google, Apple, GitHub and email. AuthScope marks Google as the one you used, 13 days ago.">
-      <div class="badge" aria-hidden="true"><img src="img/shield.png" alt=""><b>G</b></div>
+      <div class="badge" aria-hidden="true"><img src="img/shield-68.webp" alt="" width="22" height="22"><b>G</b></div>
       <div class="site" aria-hidden="true"><i></i>brightdesk.app</div>
-      <h3 aria-hidden="true">Sign in to Brightdesk</h3>
+      <p class="signin-title" aria-hidden="true">Sign in to Brightdesk</p>
       <div class="opts" aria-hidden="true">
-        <div class="opt used" style="--c:#4285f4"><span class="dot"></span><span class="label">Continue with Google</span><span class="stamp"><img src="img/shield.png" alt="">Used 13 days ago</span></div>
+        <div class="opt used" style="--c:#4285f4"><span class="dot"></span><span class="label">Continue with Google</span><span class="stamp"><img src="img/shield-68.webp" alt="" width="16" height="16">Used 13 days ago</span></div>
         <div class="opt" style="--c:#555"><span class="dot"></span>Continue with Apple</div>
         <div class="opt" style="--c:#6e5494"><span class="dot"></span>Continue with GitHub</div>
         <div class="or">or</div>
@@ -240,15 +262,15 @@ footer a { color: var(--muted); }
       </div>
     </div>
     <div class="strip" id="strip" tabindex="0" aria-label="Screenshots">
-      <figure><img src="img/authscope-1-toolbar-badge.png" alt="AuthScope's popup on notion.so showing it was signed in with Google and Apple" width="1280" height="800">
+      <figure><img src="img/authscope-1-toolbar-badge-1280.webp" srcset="img/authscope-1-toolbar-badge-640.webp 640w, img/authscope-1-toolbar-badge-840.webp 840w, img/authscope-1-toolbar-badge-1280.webp 1280w" sizes="(max-width: 1000px) 75vw, 840px" alt="AuthScope's popup on notion.so showing it was signed in with Google and Apple" width="1280" height="800">
         <figcaption><b>On any site.</b> The toolbar icon shows the provider you used, and the popup gives the details.</figcaption></figure>
-      <figure><img src="img/authscope-2-chart.png" alt="A 3D pie chart of sites per provider with Google selected and its sites listed" width="1280" height="800" loading="lazy">
+      <figure><img src="img/authscope-2-chart-1280.webp" srcset="img/authscope-2-chart-640.webp 640w, img/authscope-2-chart-840.webp 840w, img/authscope-2-chart-1280.webp 1280w" sizes="(max-width: 1000px) 75vw, 840px" alt="A 3D pie chart of sites per provider with Google selected and its sites listed" width="1280" height="800" loading="lazy">
         <figcaption><b>At a glance.</b> A 3D chart of how many sites use each provider. Click a slice to list them.</figcaption></figure>
-      <figure><img src="img/authscope-3-check-accounts.png" alt="The Check your accounts panel with app counts for Google, GitHub, Microsoft and others" width="1280" height="800" loading="lazy">
+      <figure><img src="img/authscope-3-check-accounts-1280.webp" srcset="img/authscope-3-check-accounts-640.webp 640w, img/authscope-3-check-accounts-840.webp 840w, img/authscope-3-check-accounts-1280.webp 1280w" sizes="(max-width: 1000px) 75vw, 840px" alt="The Check your accounts panel with app counts for Google, GitHub, Microsoft and others" width="1280" height="800" loading="lazy">
         <figcaption><b>From years ago.</b> Check the apps linked to your Google, GitHub, Microsoft and other accounts in one click.</figcaption></figure>
-      <figure><img src="img/authscope-4-site-list.png" alt="The site list filtered to GitHub, each app with its website" width="1280" height="800" loading="lazy">
+      <figure><img src="img/authscope-4-site-list-1280.webp" srcset="img/authscope-4-site-list-640.webp 640w, img/authscope-4-site-list-840.webp 840w, img/authscope-4-site-list-1280.webp 1280w" sizes="(max-width: 1000px) 75vw, 840px" alt="The site list filtered to GitHub, each app with its website" width="1280" height="800" loading="lazy">
         <figcaption><b>One list.</b> Every app with its website and provider. Filter, search, or remove anything.</figcaption></figure>
-      <figure><img src="img/authscope-5-private.png" alt="AuthScope's dashboard in dark mode beside its privacy points" width="1280" height="800" loading="lazy">
+      <figure><img src="img/authscope-5-private-1280.webp" srcset="img/authscope-5-private-640.webp 640w, img/authscope-5-private-840.webp 840w, img/authscope-5-private-1280.webp 1280w" sizes="(max-width: 1000px) 75vw, 840px" alt="AuthScope's dashboard in dark mode beside its privacy points" width="1280" height="800" loading="lazy">
         <figcaption><b>Private.</b> No account, no tracking, nothing sent anywhere.</figcaption></figure>
     </div>
   </div>
