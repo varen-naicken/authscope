@@ -7,6 +7,8 @@ import { scanHistory } from './lib/history.js';
 // Switched off for now: only "Check your accounts" is shown. To bring the history scan back,
 // set this to true and add "history" back to the permissions in both manifests.
 const HISTORY_SCAN = false;
+// Hidden for now: the Sign in and Manage icons in Check your accounts. Set to true to show them again.
+const ROW_LINKS = false;
 import { el, ago, sortedMethods, methodTag, methodOptions, providerIcon } from './ui/common.js';
 import { Pie3D, MAX_SLICES } from './ui/pie3d.js';
 import { donateUrl } from './lib/config.js';
@@ -245,11 +247,25 @@ function updateSelectionControls() {
   $('syncAll').disabled = busy.size === total;
 }
 
-// Sign in stands out when the last check found you signed out.
-const signInButton = (p, needed) => el('button', { class: `btn${needed ? ' primary' : ''}`, type: 'button', 'aria-label': `Sign in to ${METHODS[p.id].label}`,
-  title: `Sign in to ${METHODS[p.id].label} in a new tab, then come back and check it`, onclick: () => chrome.tabs.create({ url: p.signIn, active: true }) }, 'Sign in');
-const manageButton = (id, url) => el('button', { class: 'btn', type: 'button', 'aria-label': `Manage ${METHODS[id].label} connected apps`,
-  title: `Open ${METHODS[id].label}’s connected-apps page, where you can remove apps`, onclick: () => chrome.tabs.create({ url, active: true }) }, 'Manage');
+// Account row actions are icon buttons; the action's name shows on hover and keyboard focus.
+const ICONS = {
+  check: '<path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/>',
+  signIn: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
+  manage: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+};
+function iconButton(icon, tip, label, attrs) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = ICONS[icon];
+  return el('button', { type: 'button', ...attrs, class: `btn icon-btn ${attrs.class || ''}`, 'aria-label': label, 'data-tip': tip }, svg);
+}
+// Check is always there. Sign in only appears, highlighted, when the last check found you signed out;
+// Manage only once a check has pulled that account's apps.
+const signInButton = p => iconButton('signIn', 'Sign in', `Sign in to ${METHODS[p.id].label}`,
+  { class: 'primary', onclick: () => chrome.tabs.create({ url: p.signIn, active: true }) });
+const manageButton = (id, url) => iconButton('manage', 'Manage', `Manage ${METHODS[id].label} connected apps`,
+  { onclick: () => chrome.tabs.create({ url, active: true }) });
 
 async function renderSyncRows() {
   const state = await getSyncState();
@@ -259,14 +275,13 @@ async function renderSyncRows() {
     let stateEl, needsLogin = false;
     if (busy.has(p.id)) stateEl = el('span', { class: 'state busy' }, 'Checking…');
     else if (!s) stateEl = el('span', { class: 'state' }, 'Not checked');
-    else if (s.status === 'login') { needsLogin = true; stateEl = el('span', { class: 'state warn' }, 'Sign-in needed'); }
+    else if (s.status === 'login') { needsLogin = true; stateEl = el('span', { class: 'state warn', title: 'You weren’t signed in when this was checked. Sign in, then check again.' }, 'Signed out'); }
     else if (s.status === 'error') stateEl = el('span', { class: 'state warn', title: s.message || '' }, 'Couldn’t read');
     else stateEl = s.apps.length
       ? el('button', { class: 'btn quiet state ok', title: `Checked ${ago(s.at)}. Show these sites in your ledger.`, onclick: () => showProvider(p.id) },
           `${s.apps.length} app${s.apps.length === 1 ? '' : 's'}`)
       : el('span', { class: 'state', title: `Checked ${ago(s.at)}` }, 'None found');
 
-    const checkText = s ? 'Check again' : 'Check';
     const box = el('input', { type: 'checkbox', checked: selected.has(p.id), 'aria-label': `Select ${meta.label}` });
     box.addEventListener('change', () => {
       box.checked ? selected.add(p.id) : selected.delete(p.id);
@@ -278,16 +293,16 @@ async function renderSyncRows() {
       el('label', { class: 'pname' }, box, providerIcon(p.id, 18), meta.label),
       stateEl,
       el('div', { class: 'row-actions' },
-        el('button', { class: 'btn', type: 'button', disabled: busy.has(p.id), 'aria-label': `${checkText} ${meta.label}`,
-          title: `Read the apps linked to your ${meta.label} account`, onclick: () => runSync([p.id]) }, checkText),
-        signInButton(p, needsLogin),
-        manageButton(p.id, p.pages[0])));
+        iconButton('check', 'Check', `Check ${meta.label}`, { disabled: busy.has(p.id), onclick: () => runSync([p.id]) }),
+        ROW_LINKS && needsLogin && signInButton(p),
+        ROW_LINKS && !busy.has(p.id) && s?.status === 'ok' && s.apps.length > 0 && manageButton(p.id, p.pages[0])));
   });
-  // Apple can't be read automatically, so it only gets Sign in and Manage.
+  // Apple can't be read automatically, so Manage is how you look at its apps.
   const manual = MANUAL_PROVIDERS.map(p => el('li', { class: 'sync-row' },
     el('span', { class: 'pname' }, el('span', { class: 'spacer', 'aria-hidden': 'true' }), providerIcon(p.id, 18), METHODS[p.id].label),
     el('span', { class: 'state', title: 'Apple asks for your password on its page, so it can’t be read automatically. Open Manage, then add those sites with Add a site by hand.' }, 'Check by hand'),
-    el('div', { class: 'row-actions' }, signInButton(p, false), manageButton(p.id, p.page))));
+    el('div', { class: 'row-actions' }, ROW_LINKS && [el('span', { class: 'icon-slot', 'aria-hidden': 'true' }), manageButton(p.id, p.page)])));
+  $('syncRows').classList.toggle('links', ROW_LINKS);
   $('syncRows').replaceChildren(...rows, ...manual);
   updateSelectionControls();
 }

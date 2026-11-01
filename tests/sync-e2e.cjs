@@ -116,25 +116,36 @@ function respond(u) {
   check('provider icons load in account rows', icons.loaded === icons.rows - 1 && icons.fallback === 1 && icons.gitlabFallback, icons);
   await dash.screenshot({ path: `${OUT}/sync-results.png`, fullPage: true });
 
-  // Every account row has Check, Sign in and Manage; Sign in stands out only where the check found you signed out.
+  // Which icons each account row shows depends on what its last check found.
   const rowButtons = await dash.$$eval('#syncRows .sync-row', rows => rows.map(r => ({
     name: r.querySelector('.pname').textContent.trim(),
-    buttons: [...r.querySelectorAll('.row-actions button')].map(b => b.textContent.trim()),
-    signInPrimary: [...r.querySelectorAll('.row-actions button')].find(b => b.textContent === 'Sign in')?.classList.contains('primary'),
+    buttons: [...r.querySelectorAll('.row-actions button')].map(b => b.dataset.tip),
+    labelled: [...r.querySelectorAll('.row-actions button')].every(b => b.getAttribute('aria-label')?.startsWith(b.dataset.tip) && !b.textContent.trim() && b.querySelector('svg')),
+    signInPrimary: r.querySelector('.row-actions button[data-tip="Sign in"]')?.classList.contains('primary'),
   })));
-  const byName = n => rowButtons.find(r => r.name === n);
-  check('each account row has Check, Sign in and Manage', rowButtons.filter(r => r.name !== 'Apple').every(r => JSON.stringify(r.buttons) === '["Check again","Sign in","Manage"]'), rowButtons);
-  check('Apple row has Sign in and Manage only', JSON.stringify(byName('Apple')?.buttons) === '["Sign in","Manage"]', byName('Apple'));
-  const highlighted = rowButtons.filter(r => r.signInPrimary).map(r => r.name);
-  check('Sign in highlighted only where sign-in is needed', JSON.stringify(highlighted) === JSON.stringify(['Microsoft', 'Facebook', 'X / Twitter', 'Amazon']), highlighted);
+  // Sign in and Manage are hidden while ROW_LINKS is false in dashboard.js; test whichever way it's set.
+  const rowLinks = /const ROW_LINKS = true;/.test(fs.readFileSync(path.join(EXT, 'dashboard.js'), 'utf8'));
+  // From the check above: signed out of these, and no apps pulled from Yahoo.
+  const want = !rowLinks ? Object.fromEntries(rowButtons.map(r => [r.name, r.name === 'Apple' ? '' : 'Check'])) : { Google: 'Check,Manage', GitHub: 'Check,Manage', Microsoft: 'Check,Sign in', LinkedIn: 'Check,Manage', Facebook: 'Check,Sign in',
+    'X / Twitter': 'Check,Sign in', Discord: 'Check,Manage', GitLab: 'Check,Manage', Amazon: 'Check,Sign in', Twitch: 'Check,Manage', Yahoo: 'Check', Apple: 'Manage' };
+  const wrong = rowButtons.filter(r => want[r.name] !== r.buttons.join(','));
+  check(rowLinks ? 'Check always; Sign in only when signed out; Manage only when apps were pulled' : 'Sign in and Manage hidden: Check only', !wrong.length && rowButtons.length === 12, wrong);
+  check('Sign in is highlighted', rowButtons.filter(r => r.buttons.includes('Sign in')).every(r => r.signInPrimary), rowButtons);
+  check('icons are labelled for screen readers', rowButtons.every(r => r.labelled), rowButtons);
   const opens = async (row, label) => {
-    const [tab] = await Promise.all([ctx.waitForEvent('page'), dash.click(`.sync-row:has-text("${row}") .row-actions button:has-text("${label}")`)]);
+    const [tab] = await Promise.all([ctx.waitForEvent('page'), dash.click(`.sync-row:has-text("${row}") .row-actions button[data-tip="${label}"]`)]);
     const url = tab.url(); await tab.close(); return url;
   };
-  const ghManage = await opens('GitHub', 'Manage');
-  check('Manage opens the connected-apps page', ghManage === 'https://github.com/settings/applications', ghManage);
-  const ghSignIn = await opens('GitHub', 'Sign in');
-  check('Sign in opens the provider sign-in page', ghSignIn.startsWith('https://github.com/login'), ghSignIn);
+  await dash.hover('.sync-row:has-text("Google") .row-actions button[data-tip="Check"]'); await sleep(250);
+  const tip = await dash.$eval('.sync-row:has-text("Google") .row-actions button[data-tip="Check"]', b => { const s = getComputedStyle(b, '::after'); return { text: s.content, opacity: s.opacity }; });
+  check('hovering an icon shows its action', tip.text === '"Check"' && tip.opacity === '1', tip);
+  await dash.screenshot({ path: `${OUT}/sync-tooltip.png`, clip: { x: 760, y: 280, width: 460, height: 160 } });
+  if (rowLinks) {
+    const ghManage = await opens('GitHub', 'Manage');
+    check('Manage opens the connected-apps page', ghManage === 'https://github.com/settings/applications', ghManage);
+    const msSignIn = await opens('Microsoft', 'Sign in');
+    check('Sign in opens the provider sign-in page', msSignIn.startsWith('https://login.live.com/'), msSignIn);
+  }
 
   // Found apps go straight into the ledger, no review step.
   // Notion (google) was already there: it must not be counted as new. Notion (github) maps onto notion.so.
@@ -164,7 +175,7 @@ function respond(u) {
 
   // Checking again doesn't duplicate anything
   const before = Object.keys(ledger).length;
-  await dash.click('.sync-row:has-text("Twitch") button:has-text("Check again")');
+  await dash.click('.sync-row:has-text("Twitch") .row-actions button[data-tip="Check"]');
   await dash.waitForFunction(() => /already there/.test(document.getElementById('status').textContent), null, { timeout: 30000 });
   const after = Object.keys(await sw.evaluate(() => chrome.storage.local.get('accounts').then(r => r.accounts))).length;
   const status2 = await dash.textContent('#status');
