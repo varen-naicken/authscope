@@ -52,6 +52,9 @@
     "https://www.amazon.co.jp/*",
     "https://www.amazon.in/*"
   ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
   "background": {
     "scripts": [
       "background.js"

@@ -1,5 +1,5 @@
 import { METHODS, PROVIDER_IDS, isThirdParty, siteOf, registrableDomain } from './lib/providers.js';
-import { getAll, recordMethod, removeMethod, removeSite, mergeImport, purgeNonProvider, clearAll, getSettings, saveSettings, getSyncState, setSyncState, addProviderApp, pruneProviderApps } from './lib/store.js';
+import { getAll, recordMethod, removeMethod, removeSite, mergeImport, purgeNonProvider, clearAll, getSettings, saveSettings, MARK_ORIGINS, getSyncState, setSyncState, addProviderApp, pruneProviderApps } from './lib/store.js';
 import { SYNC_PROVIDERS, MANUAL_PROVIDERS, syncProvider } from './lib/sync.js';
 import { cleanWebsites, isDomainKey } from './lib/match.js';
 import { scanHistory } from './lib/history.js';
@@ -540,6 +540,27 @@ async function init() {
   document.querySelectorAll('[data-setting]').forEach(box => {
     box.checked = !!settings[box.dataset.setting];
     box.addEventListener('change', () => saveSettings({ [box.dataset.setting]: box.checked }));
+  });
+
+  // Pointing at buttons needs access to every site, so it's asked for here and given back when switched off.
+  let marking = settings.markButtons;
+  try { marking = marking && await chrome.permissions.contains(MARK_ORIGINS); } catch { marking = false; }
+  $('markButtons').checked = marking;
+  $('markButtons').addEventListener('change', e => {
+    const box = e.currentTarget;
+    if (!box.checked) {
+      saveSettings({ markButtons: false });
+      chrome.permissions.remove(MARK_ORIGINS).catch(() => {});
+      say('AuthScope no longer points at buttons, and its access to other sites was removed.');
+      return;
+    }
+    // Must run straight from the click, so no awaits before the request.
+    chrome.permissions.request(MARK_ORIGINS).then(ok => {
+      box.checked = ok;
+      saveSettings({ markButtons: ok });
+      say(ok ? 'On sites in your list, AuthScope will now outline the button you used. Reload an open page to see it.'
+        : 'Access wasn’t granted, so AuthScope can’t point at buttons. Your list works as before.');
+    }, () => { box.checked = false; });
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
