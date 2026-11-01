@@ -245,6 +245,12 @@ function updateSelectionControls() {
   $('syncAll').disabled = busy.size === total;
 }
 
+// Sign in stands out when the last check found you signed out.
+const signInButton = (p, needed) => el('button', { class: `btn${needed ? ' primary' : ''}`, type: 'button', 'aria-label': `Sign in to ${METHODS[p.id].label}`,
+  title: `Sign in to ${METHODS[p.id].label} in a new tab, then come back and check it`, onclick: () => chrome.tabs.create({ url: p.signIn, active: true }) }, 'Sign in');
+const manageButton = (id, url) => el('button', { class: 'btn', type: 'button', 'aria-label': `Manage ${METHODS[id].label} connected apps`,
+  title: `Open ${METHODS[id].label}’s connected-apps page, where you can remove apps`, onclick: () => chrome.tabs.create({ url, active: true }) }, 'Manage');
+
 async function renderSyncRows() {
   const state = await getSyncState();
   const rows = SYNC_PROVIDERS.map(p => {
@@ -260,6 +266,7 @@ async function renderSyncRows() {
           `${s.apps.length} app${s.apps.length === 1 ? '' : 's'}`)
       : el('span', { class: 'state', title: `Checked ${ago(s.at)}` }, 'None found');
 
+    const checkText = s ? 'Check again' : 'Check';
     const box = el('input', { type: 'checkbox', checked: selected.has(p.id), 'aria-label': `Select ${meta.label}` });
     box.addEventListener('change', () => {
       box.checked ? selected.add(p.id) : selected.delete(p.id);
@@ -270,15 +277,17 @@ async function renderSyncRows() {
     return el('li', { class: `sync-row${needsLogin ? ' needs-login' : ''}${selected.has(p.id) ? ' selected' : ''}` },
       el('label', { class: 'pname' }, box, providerIcon(p.id, 18), meta.label),
       stateEl,
-      needsLogin
-        ? el('button', { class: 'btn primary', type: 'button', onclick: () => chrome.tabs.create({ url: p.pages[0], active: true }) }, 'Sign in')
-        : el('button', { class: 'btn', type: 'button', disabled: busy.has(p.id), onclick: () => runSync([p.id]) }, s ? 'Check again' : 'Check'));
+      el('div', { class: 'row-actions' },
+        el('button', { class: 'btn', type: 'button', disabled: busy.has(p.id), 'aria-label': `${checkText} ${meta.label}`,
+          title: `Read the apps linked to your ${meta.label} account`, onclick: () => runSync([p.id]) }, checkText),
+        signInButton(p, needsLogin),
+        manageButton(p.id, p.pages[0])));
   });
+  // Apple can't be read automatically, so it only gets Sign in and Manage.
   const manual = MANUAL_PROVIDERS.map(p => el('li', { class: 'sync-row' },
     el('span', { class: 'pname' }, el('span', { class: 'spacer', 'aria-hidden': 'true' }), providerIcon(p.id, 18), METHODS[p.id].label),
-    el('span', { class: 'state' }, 'Check by hand'),
-    el('button', { class: 'btn', type: 'button', title: 'Apple asks for your password on this page, so it can’t be read automatically. Open it, then add those sites with Add a site by hand.',
-      onclick: () => chrome.tabs.create({ url: p.page, active: true }) }, 'Open')));
+    el('span', { class: 'state', title: 'Apple asks for your password on its page, so it can’t be read automatically. Open Manage, then add those sites with Add a site by hand.' }, 'Check by hand'),
+    el('div', { class: 'row-actions' }, signInButton(p, false), manageButton(p.id, p.page))));
   $('syncRows').replaceChildren(...rows, ...manual);
   updateSelectionControls();
 }

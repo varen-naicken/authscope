@@ -74,7 +74,9 @@ aside { display: flex; flex-direction: column; gap: 16px; }
 .sync-buttons { display: flex; gap: 6px; }
 .sync-buttons .btn { padding: 6px 11px; font-size: 13.5px; }
 .select-all { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); cursor: pointer; }
-.sync-row { display: grid; grid-template-columns: max-content minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 8px 18px; border-bottom: 1px solid var(--line); }
+.sync-row { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 6px 8px; padding: 10px 18px; border-bottom: 1px solid var(--line); }
+/* Check, Sign in and Manage sit under the name, lined up with it (past the checkbox). */
+.sync-row .row-actions { grid-column: 1 / -1; display: flex; gap: 6px; padding-left: 24px; }
 .sync-row .pname { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; min-width: 0; white-space: nowrap; }
 .sync-row .pname input, .select-all input { margin: 0; width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
 /* Apple has no checkbox; keep its icon lined up with the others. */
@@ -83,6 +85,7 @@ aside { display: flex; flex-direction: column; gap: 16px; }
 .sync-row .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
 .sync-row .state { font-size: 13px; color: var(--muted); text-align: right; line-height: 1.25; justify-self: end; }
 .sync-row .state.ok { color: var(--accent); font-weight: 700; white-space: nowrap; }
+.sync-row .btn.state { padding: 4px 0 4px 8px; }
 .sync-row .state.warn { color: var(--danger); font-weight: 700; }
 .sync-row .state.busy { color: var(--ink); }
 .sync-row .btn { padding: 4px 10px; font-size: 13px; }

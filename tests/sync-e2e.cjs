@@ -116,6 +116,26 @@ function respond(u) {
   check('provider icons load in account rows', icons.loaded === icons.rows - 1 && icons.fallback === 1 && icons.gitlabFallback, icons);
   await dash.screenshot({ path: `${OUT}/sync-results.png`, fullPage: true });
 
+  // Every account row has Check, Sign in and Manage; Sign in stands out only where the check found you signed out.
+  const rowButtons = await dash.$$eval('#syncRows .sync-row', rows => rows.map(r => ({
+    name: r.querySelector('.pname').textContent.trim(),
+    buttons: [...r.querySelectorAll('.row-actions button')].map(b => b.textContent.trim()),
+    signInPrimary: [...r.querySelectorAll('.row-actions button')].find(b => b.textContent === 'Sign in')?.classList.contains('primary'),
+  })));
+  const byName = n => rowButtons.find(r => r.name === n);
+  check('each account row has Check, Sign in and Manage', rowButtons.filter(r => r.name !== 'Apple').every(r => JSON.stringify(r.buttons) === '["Check again","Sign in","Manage"]'), rowButtons);
+  check('Apple row has Sign in and Manage only', JSON.stringify(byName('Apple')?.buttons) === '["Sign in","Manage"]', byName('Apple'));
+  const highlighted = rowButtons.filter(r => r.signInPrimary).map(r => r.name);
+  check('Sign in highlighted only where sign-in is needed', JSON.stringify(highlighted) === JSON.stringify(['Microsoft', 'Facebook', 'X / Twitter', 'Amazon']), highlighted);
+  const opens = async (row, label) => {
+    const [tab] = await Promise.all([ctx.waitForEvent('page'), dash.click(`.sync-row:has-text("${row}") .row-actions button:has-text("${label}")`)]);
+    const url = tab.url(); await tab.close(); return url;
+  };
+  const ghManage = await opens('GitHub', 'Manage');
+  check('Manage opens the connected-apps page', ghManage === 'https://github.com/settings/applications', ghManage);
+  const ghSignIn = await opens('GitHub', 'Sign in');
+  check('Sign in opens the provider sign-in page', ghSignIn.startsWith('https://github.com/login'), ghSignIn);
+
   // Found apps go straight into the ledger, no review step.
   // Notion (google) was already there: it must not be counted as new. Notion (github) maps onto notion.so.
   const ledger = await sw.evaluate(() => chrome.storage.local.get('accounts').then(r => r.accounts));
