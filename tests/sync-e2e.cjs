@@ -123,29 +123,25 @@ function respond(u) {
     labelled: [...r.querySelectorAll('.row-actions button')].every(b => b.getAttribute('aria-label')?.startsWith(b.dataset.tip) && !b.textContent.trim() && b.querySelector('svg')),
     signInPrimary: r.querySelector('.row-actions button[data-tip="Sign in"]')?.classList.contains('primary'),
   })));
-  // Sign in and Manage are hidden while ROW_LINKS is false in dashboard.js; test whichever way it's set.
-  const rowLinks = /const ROW_LINKS = true;/.test(fs.readFileSync(path.join(EXT, 'dashboard.js'), 'utf8'));
-  // From the check above: signed out of these, and no apps pulled from Yahoo.
-  const want = !rowLinks ? Object.fromEntries(rowButtons.map(r => [r.name, r.name === 'Apple' ? '' : 'Check'])) : { Google: 'Check,Manage', GitHub: 'Check,Manage', Microsoft: 'Check,Sign in', LinkedIn: 'Check,Manage', Facebook: 'Check,Sign in',
-    'X / Twitter': 'Check,Sign in', Discord: 'Check,Manage', GitLab: 'Check,Manage', Amazon: 'Check,Sign in', Twitch: 'Check,Manage', Yahoo: 'Check', Apple: 'Manage' };
+  // One icon per row, from the check above: Sign in where signed out, Manage where apps were found, otherwise Check.
+  const want = { Google: 'Manage', GitHub: 'Manage', Microsoft: 'Sign in', LinkedIn: 'Manage', Facebook: 'Sign in', 'X / Twitter': 'Sign in',
+    Discord: 'Manage', GitLab: 'Manage', Amazon: 'Sign in', Twitch: 'Manage', Yahoo: 'Check', Apple: 'Manage' };
   const wrong = rowButtons.filter(r => want[r.name] !== r.buttons.join(','));
-  check(rowLinks ? 'Check always; Sign in only when signed out; Manage only when apps were pulled' : 'Sign in and Manage hidden: Check only', !wrong.length && rowButtons.length === 12, wrong);
+  check('Check becomes Manage when apps were found, Sign in when signed out', !wrong.length && rowButtons.length === 12, wrong);
   check('Sign in is highlighted', rowButtons.filter(r => r.buttons.includes('Sign in')).every(r => r.signInPrimary), rowButtons);
   check('icons are labelled for screen readers', rowButtons.every(r => r.labelled), rowButtons);
   const opens = async (row, label) => {
     const [tab] = await Promise.all([ctx.waitForEvent('page'), dash.click(`.sync-row:has-text("${row}") .row-actions button[data-tip="${label}"]`)]);
     const url = tab.url(); await tab.close(); return url;
   };
-  await dash.hover('.sync-row:has-text("Google") .row-actions button[data-tip="Check"]'); await sleep(250);
-  const tip = await dash.$eval('.sync-row:has-text("Google") .row-actions button[data-tip="Check"]', b => { const s = getComputedStyle(b, '::after'); return { text: s.content, opacity: s.opacity }; });
+  await dash.hover('.sync-row:has-text("Yahoo") .row-actions button[data-tip="Check"]'); await sleep(250);
+  const tip = await dash.$eval('.sync-row:has-text("Yahoo") .row-actions button[data-tip="Check"]', b => { const s = getComputedStyle(b, '::after'); return { text: s.content, opacity: s.opacity }; });
   check('hovering an icon shows its action', tip.text === '"Check"' && tip.opacity === '1', tip);
   await dash.screenshot({ path: `${OUT}/sync-tooltip.png`, clip: { x: 760, y: 280, width: 460, height: 160 } });
-  if (rowLinks) {
-    const ghManage = await opens('GitHub', 'Manage');
-    check('Manage opens the connected-apps page', ghManage === 'https://github.com/settings/applications', ghManage);
-    const msSignIn = await opens('Microsoft', 'Sign in');
-    check('Sign in opens the provider sign-in page', msSignIn.startsWith('https://login.live.com/'), msSignIn);
-  }
+  const ghManage = await opens('GitHub', 'Manage');
+  check('Manage opens the connected-apps page', ghManage === 'https://github.com/settings/applications', ghManage);
+  const msSignIn = await opens('Microsoft', 'Sign in');
+  check('Sign in opens the provider sign-in page', msSignIn.startsWith('https://login.live.com/'), msSignIn);
 
   // Found apps go straight into the ledger, no review step.
   // Notion (google) was already there: it must not be counted as new. Notion (github) maps onto notion.so.
@@ -175,7 +171,9 @@ function respond(u) {
 
   // Checking again doesn't duplicate anything
   const before = Object.keys(ledger).length;
-  await dash.click('.sync-row:has-text("Twitch") .row-actions button[data-tip="Check"]');
+  // Twitch shows Manage now, so re-check it by ticking it and using Check selected.
+  await dash.click('.sync-row:has-text("Twitch") label.pname input');
+  await dash.click('#syncSelected');
   await dash.waitForFunction(() => /already there/.test(document.getElementById('status').textContent), null, { timeout: 30000 });
   const after = Object.keys(await sw.evaluate(() => chrome.storage.local.get('accounts').then(r => r.accounts))).length;
   const status2 = await dash.textContent('#status');

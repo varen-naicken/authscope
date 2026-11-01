@@ -76,10 +76,7 @@ aside { display: flex; flex-direction: column; gap: 16px; }
 .sync-buttons .btn { padding: 6px 11px; font-size: 13.5px; }
 .select-all { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); cursor: pointer; }
 .sync-row { display: grid; grid-template-columns: max-content minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 8px 18px; border-bottom: 1px solid var(--line); }
-/* Two fixed slots, so Check lines up down the list whether or not Sign in or Manage is showing. */
-.sync-row .row-actions { display: flex; gap: 4px; justify-self: end; }
-.links .sync-row .row-actions { width: 64px; }
-.sync-row .icon-slot { width: 30px; flex: none; }
+.sync-row .row-actions { display: flex; justify-self: end; }
 .icon-btn { position: relative; width: 30px; height: 30px; padding: 0 !important; display: inline-grid; place-items: center; }
 .icon-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 /* The action's name, shown above the icon on hover or keyboard focus. */

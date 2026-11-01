@@ -7,8 +7,6 @@ import { scanHistory } from './lib/history.js';
 // Switched off for now: only "Check your accounts" is shown. To bring the history scan back,
 // set this to true and add "history" back to the permissions in both manifests.
 const HISTORY_SCAN = false;
-// Hidden for now: the Sign in and Manage icons in Check your accounts. Set to true to show them again.
-const ROW_LINKS = false;
 import { el, ago, sortedMethods, methodTag, methodOptions, providerIcon } from './ui/common.js';
 import { Pie3D, MAX_SLICES } from './ui/pie3d.js';
 import { donateUrl } from './lib/config.js';
@@ -260,8 +258,8 @@ function iconButton(icon, tip, label, attrs) {
   svg.innerHTML = ICONS[icon];
   return el('button', { type: 'button', ...attrs, class: `btn icon-btn ${attrs.class || ''}`, 'aria-label': label, 'data-tip': tip }, svg);
 }
-// Check is always there. Sign in only appears, highlighted, when the last check found you signed out;
-// Manage only once a check has pulled that account's apps.
+// Each account row has one icon: Sign in (highlighted) when the last check found you signed out,
+// Manage once a check has pulled that account's apps, otherwise Check. Check selected / Check all re-check any row.
 const signInButton = p => iconButton('signIn', 'Sign in', `Sign in to ${METHODS[p.id].label}`,
   { class: 'primary', onclick: () => chrome.tabs.create({ url: p.signIn, active: true }) });
 const manageButton = (id, url) => iconButton('manage', 'Manage', `Manage ${METHODS[id].label} connected apps`,
@@ -293,16 +291,15 @@ async function renderSyncRows() {
       el('label', { class: 'pname' }, box, providerIcon(p.id, 18), meta.label),
       stateEl,
       el('div', { class: 'row-actions' },
-        iconButton('check', 'Check', `Check ${meta.label}`, { disabled: busy.has(p.id), onclick: () => runSync([p.id]) }),
-        ROW_LINKS && needsLogin && signInButton(p),
-        ROW_LINKS && !busy.has(p.id) && s?.status === 'ok' && s.apps.length > 0 && manageButton(p.id, p.pages[0])));
+        busy.has(p.id) || !(needsLogin || (s?.status === 'ok' && s.apps.length))
+          ? iconButton('check', 'Check', `Check ${meta.label}`, { disabled: busy.has(p.id), onclick: () => runSync([p.id]) })
+          : needsLogin ? signInButton(p) : manageButton(p.id, p.pages[0])));
   });
   // Apple can't be read automatically, so Manage is how you look at its apps.
   const manual = MANUAL_PROVIDERS.map(p => el('li', { class: 'sync-row' },
     el('span', { class: 'pname' }, el('span', { class: 'spacer', 'aria-hidden': 'true' }), providerIcon(p.id, 18), METHODS[p.id].label),
     el('span', { class: 'state', title: 'Apple asks for your password on its page, so it can’t be read automatically. Open Manage, then add those sites with Add a site by hand.' }, 'Check by hand'),
-    el('div', { class: 'row-actions' }, ROW_LINKS && [el('span', { class: 'icon-slot', 'aria-hidden': 'true' }), manageButton(p.id, p.page)])));
-  $('syncRows').classList.toggle('links', ROW_LINKS);
+    el('div', { class: 'row-actions' }, manageButton(p.id, p.page))));
   $('syncRows').replaceChildren(...rows, ...manual);
   updateSelectionControls();
 }
