@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AuthScope: Which account did I sign in with?",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "See which sites you signed in to with Google, Apple, GitHub and other providers. Everything stays on your device.",
   "browser_specific_settings": {
     "gecko": {
