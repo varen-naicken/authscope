@@ -3,6 +3,7 @@
   "name": "AuthScope: Which account did I sign in with?",
   "version": "3.3.0",
   "description": "See which sites you signed in to with Google, Apple, GitHub and other providers. Everything stays on your device.",
+  "homepage_url": "https://authscope.app/",
   "browser_specific_settings": {
     "gecko": {
       "id": "login-ledger@varen.local",
